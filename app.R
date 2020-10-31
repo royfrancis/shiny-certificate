@@ -1,4 +1,4 @@
-## nbis-doorsign
+## certificate
 ## R shinyapp to generate workshop certificates
 ## 2020 Roy Mathew Francis
 

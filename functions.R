@@ -1,4 +1,4 @@
-# nbis-certificate
+# certificate
 # functions
 
 library(Cairo)

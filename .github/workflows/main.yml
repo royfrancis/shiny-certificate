@@ -1,4 +1,4 @@
-name: publish docker image
+name: docker-build
 on:
   release:
     types: [published]

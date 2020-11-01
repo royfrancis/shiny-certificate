@@ -9,7 +9,11 @@ source("functions.R")
 ui <- fluidPage(theme=shinytheme("flatly"),
   fixedRow(
       column(12,style="margin:15px;",
-          tags$h3(strong("NBIS | Workshop Certificate")),
+             fluidRow(style="margin-bottom:10px;",
+               span(tags$img(src='nbis.png',style="height:18px;"),style="vertical-align:top;display:inline-block;"),
+               span(tags$h4("•",style="margin:0px;margin-left:6px;margin-right:6px;"),style="vertical-align:top;display:inline-block;"),
+               span(tags$h4(strong("Workshop Certificate"),style="margin:0px;"),style="vertical-align:middle;display:inline-block;")
+             ),
     fixedRow(
     column(3,style="max-width:450px;background:#ebedef;padding-top:15px;padding-bottom:15px;border-radius:4px;",
      div(

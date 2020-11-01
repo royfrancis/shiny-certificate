@@ -16,7 +16,7 @@ showtext_opts(dpi=300)
 
 # fn_version
 fn_version <- function() {
-  return("v0.01")
+  return("v1.0.0")
 }
 
 # validation

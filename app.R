@@ -30,7 +30,7 @@ ui <- fluidPage(theme=shinytheme("flatly"),
       sliderInput("in_pos_y","Y position",min=0.01,max=0.90,value=0.72,step=0.01),
       downloadButton("btn_download","Download"),
       tags$hr(),
-      helpText(paste0("2020 | Roy Francis | Version: ",fn_version()))
+      helpText(paste0(format(Sys.time(),"%Y")," | Roy Francis | Version: ",fn_version()))
     ),
     column(9,style="max-width:450px;min-width:400px;padding-top:15px;padding-bottom:15px;border-radius:4px;",
       sliderInput("in_scale","Image preview scale",min=1,max=5,step=0.2,value=2.2),

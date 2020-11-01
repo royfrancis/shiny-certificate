@@ -11,7 +11,7 @@ library(shinythemes)
 library(shinyAce)
 library(showtext)
 
-if(!"gfont" %in% sysfonts::font.families()) font_add_google("Lato","gfont")
+if(!"gfont" %in% sysfonts::font_families()) font_add_google("Lato","gfont")
 showtext_opts(dpi=300)
 
 # fn_version

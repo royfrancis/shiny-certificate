@@ -13,8 +13,16 @@ Click [here](https://roymf.shinyapps.io/certificate/) to access an online instan
 ### Run using docker
 
 ```
-docker pull docker.pkg.github.com/royfrancis/shiny-certificate/shiny-certificate:latest
+docker run --rm -p 8787:8787 royfrancis/shiny-certificate:v1.0.0
 ```
+
+or
+
+```
+docker run --rm -p 8787:8787 docker.pkg.github.com/royfrancis/shiny-certificate/shiny-certificate:v1.0.0
+```
+
+The app should be available through a web browser at `http://0.0.0.0:3838`.
 
 ### Run in R
 

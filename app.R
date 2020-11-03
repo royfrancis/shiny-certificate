@@ -122,18 +122,14 @@ server <- function(input, output, session) {
 
   fn_download <- function(){
     
-    #progress$set(message="Capturing settings...", value=12)
     p <- fn_params()
     
-    #progress$set(message="Generating PDFs...", value=40)
     sapply(p$names,make_certificate,txt=p$txt,img_bg=p$bg,pos_x=p$pos_x,pos_y=p$pos_y,
            logo_right=p$logo_right,path=store$epath)
     
-    #progress$set(message="Discarding old files...", value=68)
     epathn <- file.path(store$epath,"certificates.zip")
     if(exists(epathn)) unlink(epathn)
     
-    #progress$set(message="Zipping plots...", value=78)
     zip(epathn,files=list.files(path=store$epath,pattern="pdf",full.names=TRUE))
     unlink(list.files(path=store$epath,pattern="pdf",full.names=TRUE))
   }

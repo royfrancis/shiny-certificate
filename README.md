@@ -1,4 +1,4 @@
-# shiny-certificate [![gh-actions-build-status](https://github.com/royfrancis/shiny-certificate/workflows/docker-build/badge.svg)](https://github.com/royfrancis/shiny-certificate/actions?workflow=docker-build)
+# shiny-certificate [![gh-actions-build-status](https://github.com/royfrancis/shiny-certificate/workflows/dockerhub/badge.svg)](https://github.com/royfrancis/shiny-certificate/actions?workflow=dockerhub)
 
 This is an R shiny app to create certificates for NBIS workshops.
 
@@ -13,13 +13,7 @@ Click [here](https://roymf.shinyapps.io/certificate/) to access an online instan
 ### Run using docker
 
 ```
-docker run --rm -p 8787:8787 royfrancis/shiny-certificate:v1.0.0
-```
-
-or
-
-```
-docker run --rm -p 8787:8787 docker.pkg.github.com/royfrancis/shiny-certificate/shiny-certificate:v1.0.0
+docker run --rm -p 8787:8787 royfrancis/shiny-certificate:v1.0.2
 ```
 
 The app should be available through a web browser at `http://0.0.0.0:3838`.

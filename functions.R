@@ -16,7 +16,7 @@ showtext_opts(dpi=300)
 
 # fn_version
 fn_version <- function() {
-  return("v1.0.0")
+  return("v1.0.2")
 }
 
 # validation
@@ -69,16 +69,16 @@ fn_validate <- function(input,message1,message2,message3)
 #' @param img_offset_y Image distance from y edge
 #' @param canvas_height Canvas height in any units
 #' @param canvas_width Canvas width in any units
-#' 
+#'
 img_dims_right <- function(img,img_width,img_offset_x,img_offset_y,canvas_height,canvas_width) {
-  
+
   w_scaler <- canvas_width/canvas_height
   img_height <- ((img_width*nrow(img))/ncol(img))*w_scaler
   img_x2 <- 1-img_offset_x
   img_x1 <- img_x2-img_width
   img_y2 <- 1-img_offset_y
   img_y1 <- round(img_y2-img_height,3)
-  
+
   return(list(xmin=img_x1,xmax=img_x2,ymin=img_y1,ymax=img_y2))
 }
 
@@ -100,26 +100,26 @@ img_dims_right <- function(img,img_width,img_offset_x,img_offset_y,canvas_height
 #' @param format_export [character] A character indicating export format. "jpeg","png" or "pdf".
 #' @param path_export [character] Export path
 #' @return Does not return any value. Exports an A4 sized PDF.
-#' 
+#'
 make_certificate <- function(name="John Doe",txt,pos_x=0.08,pos_y=0.72,img_bg=NULL,
                              logo_right=NULL,logo_right_width=0.13,logo_right_offset_x=0.09,logo_right_offset_y=0.065,
                              width=210,height=297,format_export="pdf",path_export=".") {
-  
+
   txt <- gsub("\n","<br>",txt)
   txt <- sub("<<name>>",paste0("<span style='font-size:28pt;'>",name,"</span>"),txt)
   txt <- gsub("- ","• ",txt)
-  
+
   dfr <- data.frame(label=txt,x=pos_x,y=pos_y)
-  
+
   p <- ggplot()
-  
+
   if(!is.null(img_bg)) p <- p+annotation_raster(img_bg,xmin=0,xmax=1,ymin=0,ymax=1)
   if(!is.null(logo_right)) {
     dims_logo_right <- img_dims_right(logo_right,logo_right_width,logo_right_offset_x,logo_right_offset_y,height,width)
     p <- p + annotation_raster(logo_right,xmin=dims_logo_right$xmin,xmax=dims_logo_right$xmax,
                                           ymin=dims_logo_right$ymin,ymax=dims_logo_right$ymax)
   }
-  
+
    p <- p+
     ggtext::geom_richtext(data=dfr,aes(x,y,label=label),hjust=0,vjust=1,size=5,family="gfont",colour="grey10",
                   fill=NA,label.color=NA,label.padding=grid::unit(rep(0,4),"pt"),lineheight=1.45)+
@@ -149,9 +149,9 @@ make_certificate <- function(name="John Doe",txt,pos_x=0.08,pos_y=0.72,img_bg=NU
           plot.background=element_blank(),
           plot.margin=margin(0,0,0,0),
           axis.ticks.length=unit(0,"pt"))
-  
+
   message(paste0("Exported ",file.path(path_export,paste0("certificate-",tolower(gsub(" ","-",name)),".",format_export)),"."))
-  
+
   if(format_export=="pdf") {
     grDevices::cairo_pdf(file=file.path(path_export,paste0("certificate-",tolower(gsub(" ","-",name)),".pdf")),
                          height=round(height/25.4,2),width=round(width/25.4,2))
@@ -169,7 +169,7 @@ make_certificate <- function(name="John Doe",txt,pos_x=0.08,pos_y=0.72,img_bg=NU
     showtext::showtext_end()
     dev.off()
   }
-  
+
   if(format_export=="jpeg") {
     grDevices::jpeg(file=file.path(path_export,paste0("certificate-",tolower(gsub(" ","-",name)),".jpeg")),
                    width=width,height=height,units="mm",res=300,quality=98,type="cairo")

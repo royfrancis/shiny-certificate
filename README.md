@@ -1,4 +1,6 @@
-# shiny-certificate [![gh-actions-build-status](https://github.com/royfrancis/shiny-certificate/workflows/dockerhub/badge.svg)](https://github.com/royfrancis/shiny-certificate/actions?workflow=dockerhub)
+# shiny-certificate
+
+[![gh-actions-build-status](https://github.com/royfrancis/shiny-certificate/workflows/build/badge.svg)](https://github.com/royfrancis/shiny-certificate/actions?workflow=build) [![Docker Image Size (latest by date)](https://img.shields.io/docker/image-size/royfrancis/shiny-certificate?label=dockerhub)](https://hub.docker.com/repository/docker/royfrancis/shiny-certificate)
 
 This is an R shiny app to create certificates for NBIS workshops.
 

@@ -5,6 +5,7 @@ library(Cairo)
 library(curl)
 library(ggplot2)
 library(ggtext)
+library(magick)
 library(png)
 library(shiny)
 library(shinythemes)
@@ -16,7 +17,7 @@ showtext_opts(dpi=300)
 
 # fn_version
 fn_version <- function() {
-  return("v1.0.2")
+  return("v1.1.0")
 }
 
 # validation
@@ -62,11 +63,11 @@ fn_validate <- function(input,message1,message2,message3)
 # img_dims_right ------------------------------------------------------------
 
 #' @title img_dims_right
-#' @description Computes image dimensions to place on a plot
+#' @description Computes image dimensions for a right aligned image
 #' @param img An image object from readPNG()
 #' @param img_width Final image width in plot units
-#' @param img_offset_x Image distance from x edge
-#' @param img_offset_y Image distance from y edge
+#' @param img_offset_x Image distance from right x edge
+#' @param img_offset_y Image distance from top y edge
 #' @param canvas_height Canvas height in any units
 #' @param canvas_width Canvas width in any units
 #'
@@ -82,7 +83,53 @@ img_dims_right <- function(img,img_width,img_offset_x,img_offset_y,canvas_height
   return(list(xmin=img_x1,xmax=img_x2,ymin=img_y1,ymax=img_y2))
 }
 
-# make_certificate ------------------------------------------------------------
+# img_dims_left ------------------------------------------------------------
+
+#' @title img_dims_left
+#' @description Computes image dimensions for a left aligned image
+#' @param img An image object from readPNG()
+#' @param img_width Final image width in plot units
+#' @param img_offset_x Image distance from left x edge
+#' @param img_offset_y Image distance from top y edge
+#' @param canvas_height Canvas height in any units
+#' @param canvas_width Canvas width in any units
+#' 
+img_dims_left <- function(img,img_width,img_offset_x,img_offset_y,canvas_height,canvas_width) {
+  
+  w_scaler <- canvas_width/canvas_height
+  img_height <- ((img_width*nrow(img))/ncol(img))*w_scaler
+  img_x1 <- img_offset_x
+  img_x2 <- img_x1+img_width
+  img_y2 <- 1-img_offset_y
+  img_y1 <- round(img_y2-img_height,3)
+  
+  return(list(xmin=img_x1,xmax=img_x2,ymin=img_y1,ymax=img_y2))
+}
+
+# img_dims -----------------------------------------------------------------
+
+#' @title img_dims
+#' @description Computes image dimensions to place on a plot
+#' @param img An image object from readPNG()
+#' @param img_width Final image width in plot units
+#' @param img_pos_x Image x start position
+#' @param img_pos_y Image y end position
+#' @param canvas_height Canvas height in any units
+#' @param canvas_width Canvas width in any units
+#' 
+img_dims <- function(img,img_width,img_pos_x,img_pos_y,canvas_height,canvas_width) {
+  
+  w_scaler <- canvas_width/canvas_height
+  img_height <- ((img_width*nrow(img))/ncol(img))*w_scaler
+  img_x1 <- img_pos_x
+  img_x2 <- img_x1+img_width
+  img_y2 <- 1-(img_pos_y+(img_pos_y*w_scaler))
+  img_y1 <- round(img_y2-img_height,3)
+  
+  return(list(xmin=img_x1,xmax=img_x2,ymin=img_y1,ymax=img_y2))
+}
+
+  # make_certificate ------------------------------------------------------------
 
 #' @title make_certificate
 #' @description Generates a PDF certificate
@@ -95,6 +142,9 @@ img_dims_right <- function(img,img_width,img_offset_x,img_offset_y,canvas_height
 #' @param logo_right_width [numeric] Width of the logo in plot units
 #' @param logo_right_offset_x [numeric] Logo distance from x edge
 #' @param logo_right_offset_y [numeric] Logo distance from y edge
+#' @param img_sign [array] Signature png image, output from readPNG().
+#' @param img_sign_width [numeric] Width of the signature in plot units
+#' @param img_sign_offset_y [numeric] Position of signature on y axis
 #' @param height [numeric] Height of output document
 #' @param width [numeric] Width of output document
 #' @param format_export [character] A character indicating export format. "jpeg","png" or "pdf".
@@ -103,6 +153,7 @@ img_dims_right <- function(img,img_width,img_offset_x,img_offset_y,canvas_height
 #'
 make_certificate <- function(name="John Doe",txt,pos_x=0.08,pos_y=0.72,img_bg=NULL,
                              logo_right=NULL,logo_right_width=0.13,logo_right_offset_x=0.09,logo_right_offset_y=0.065,
+                             img_sign=NULL,img_sign_width=0.40,img_sign_offset_y=0.70,
                              width=210,height=297,format_export="pdf",path_export=".") {
 
   txt <- gsub("\n","<br>",txt)
@@ -120,6 +171,14 @@ make_certificate <- function(name="John Doe",txt,pos_x=0.08,pos_y=0.72,img_bg=NU
                                           ymin=dims_logo_right$ymin,ymax=dims_logo_right$ymax)
   }
 
+  # add signature
+  if(!is.null(img_sign)) {
+    img_sign_offset_x <- pos_x
+    dims_img_sign <- img_dims_left(img_sign,img_sign_width,img_sign_offset_x,img_sign_offset_y,height,width)
+    p <- p + annotation_raster(img_sign,xmin=dims_img_sign$xmin,xmax=dims_img_sign$xmax,
+                               ymin=dims_img_sign$ymin,ymax=dims_img_sign$ymax)
+  }
+  
    p <- p+
     ggtext::geom_richtext(data=dfr,aes(x,y,label=label),hjust=0,vjust=1,size=5,family="gfont",colour="grey10",
                   fill=NA,label.color=NA,label.padding=grid::unit(rep(0,4),"pt"),lineheight=1.45)+
@@ -129,9 +188,10 @@ make_certificate <- function(name="John Doe",txt,pos_x=0.08,pos_y=0.72,img_bg=NU
               aes(x,y,label=label),hjust=0,size=6,family="gfont",colour="white")+
     geom_text(data=data.frame(label="www.nbis.se",x=pos_x,y=0.93),
               aes(x,y,label=label),hjust=0,size=4,family="gfont",colour="white")+
-    ggtext::geom_richtext(data=data.frame(label="**National Bioinformatics Infrastructure Sweden (NBIS)** is a distributed national research infrastructure supported by the <br>
-    Swedish Research Council (Vetenskapsrådet), Science for Life Laboratory, Knut and Alice Wallenberg Foundation and <br>
-    all major Swedish universities in providing state-of-the-art bioinformatics to the Swedish life science research community.",x=pos_x,y=0.06),
+    ggtext::geom_richtext(data=data.frame(label="This is a certificate of participation. Participants are not evaluated. <br>
+    **National Bioinformatics Infrastructure Sweden (NBIS)** is a distributed national research infrastructure supported by the <br>
+    Swedish Research Council, Science for Life Laboratory, Knut and Alice Wallenberg Foundation and all major Swedish universities <br>
+    in providing state-of-the-art bioinformatics to the Swedish life science research community.",x=pos_x,y=0.06),
                aes(x,y,label=label),hjust=0,size=3,family="gfont",colour="grey10",lineheight=1.3,fill=NA,label.color=NA,label.padding=grid::unit(rep(0,4),"pt"))+
     coord_cartesian(xlim=c(0,1),ylim=c(0,1))+
     scale_x_continuous(expand=c(0,0))+

@@ -1,0 +1,34 @@
+/* custom css styles */
+
+#in_names {
+  margin-bottom:0;
+}
+
+#in_txt {
+  margin-bottom:0;
+}
+
+#in_img_sign_progress {
+  margin-bottom:0;
+}
+
+.form-group {
+  margin-bottom:0;
+}
+
+.help-note {
+  font-size:0.85em;
+  color:#8a6d3b;
+  background-color:#fcf8e3;
+  border-color:#faebcc;
+  padding:6px;
+  margin-bottom:3px;
+  border-radius:3px;
+}
+
+.img-output {
+  -webkit-box-shadow: 1px 1px 6px lightgrey;
+  -moz-box-shadow: 1px 1px 6px lightgrey;
+  box-shadow: 1px 1px 6px lightgrey;
+  display:inline-block;
+}

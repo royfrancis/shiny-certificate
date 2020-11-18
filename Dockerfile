@@ -5,7 +5,7 @@ ARG REPO="royfrancis/shiny-certificate"
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get clean && \
-    apt-get install -y git libxml2-dev && \
+    apt-get install -y git libxml2-dev libmagick++-dev && \
     rm -rf /var/lib/apt/lists/*
 
 RUN Rscript -e 'install.packages(c("Cairo","curl","ggplot2","ggtext","magick","png","shinythemes","shinyAce","showtext"))'

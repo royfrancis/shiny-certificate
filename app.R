@@ -42,7 +42,7 @@ ui <- fluidPage(theme=shinytheme("flatly"),
                                            numericInput("in_offset_y","Y position",min=0.01,max=0.90,value=0.72,step=0.01)
                                     )
                                   ),
-                                  fileInput("in_img_sign","Upload Signature",multiple=FALSE,width="100%"),
+                                  fileInput("in_im_sign","Upload Signature",multiple=FALSE,width="100%"),
                                   fluidRow(
                                     column(12,
                                            HTML('<div class="help-note"><i class="fas fa-info-circle"></i>  Use a PNG image with transparent background.</div>'),
@@ -50,14 +50,14 @@ ui <- fluidPage(theme=shinytheme("flatly"),
                                   ),
                                   fluidRow(style="margin-bottom:15px;margin-top:10px;",
                                     column(6,style=list("padding-right: 3px;"),
-                                           numericInput("in_img_sign_width","Signature width",min=0.01,max=0.90,value=0.40,step=0.01)
+                                           numericInput("in_im_sign_width","Signature size",min=0.01,max=0.90,value=0.40,step=0.01)
                                     ),
                                     column(6,style=list("padding-left: 3px;"),
-                                           numericInput("in_img_sign_offset_y","Signature Y position",min=0.01,max=0.90,value=0.70,step=0.01)
+                                           numericInput("in_im_sign_offset_y","Signature position",min=0.01,max=0.90,value=0.70,step=0.01)
                                     )
                                   ),
                                   div(style="margin-top:20px;margin-bottom:20px;",downloadButton("btn_download","Download")),
-                                  helpText(paste0(format(Sys.time(),"%Y")," • Roy Francis • Version: ",fn_version()))
+                                  div(style="font-size:0.8em;",paste0(format(Sys.time(),'%Y'),' • Roy Francis • Version: ',fn_version()))
                            ),
                            column(9,style="max-width:450px;min-width:400px;padding-top:15px;padding-bottom:15px;border-radius:4px;",
                                   sliderInput("in_scale","Image preview scale",min=1,max=5,step=0.2,value=2.2),
@@ -94,38 +94,38 @@ server <- function(input, output, session) {
     #validate(fn_validate(input$in_text_email))
     #validate(fn_validate(input$in_text_phone))
     
-    fn_validate_img <- function(x){
+    fn_validate_im <- function(x){
       if(!is.null(x)){
         y <- tolower(sub("^.+[.]","",basename(x$datapath)))
-        if(!y %in% c("jpg","png","jpeg","gif")) return("Signature must be an image in one of JPG/JPEG, PNG or GIF formats.")
-        if((x$size/1024/1024)>1) return("Signature image must be less than 1MB in size.")
+        if(!y %in% c("jpg","png","jpeg","gif")) return("Image must be one of JPG/JPEG, PNG or GIF formats.")
+        if((x$size/1024/1024)>1) return("Image must be less than 1MB in size.")
       }
     }
     
-    validate(fn_validate_img(input$in_img_sign))
+    validate(fn_validate_im(input$in_im_sign))
     
     # if values are available, use them, else use defaults
     if(is.null(input$in_names)){names <- "John Doe"}else{names <- unlist(strsplit(input$in_names,"\n"))}
     if(is.null(input$in_txt)){txt <- txt_default}else{txt <- input$in_txt}
     if(is.null(input$in_offset_x)){offset_x <- 0.08}else{offset_x <- input$in_offset_x}
     if(is.null(input$in_offset_y)){offset_y <- 0.72}else{offset_y <- input$in_offset_y}
-    if(is.null(input$in_img_sign_width)){img_sign_width<- 0.40}else{img_sign_width <- input$in_img_sign_width}
-    if(is.null(input$in_img_sign_offset_y)){img_sign_offset_y <- 0.70}else{img_sign_offset_y <- input$in_img_sign_offset_y}
+    if(is.null(input$in_im_sign_width)){im_sign_width<- 0.40}else{im_sign_width <- input$in_im_sign_width}
+    if(is.null(input$in_im_sign_offset_y)){im_sign_offset_y <- 0.70}else{im_sign_offset_y <- input$in_im_sign_offset_y}
     
-    if(is.null(input$in_img_sign)) {
-      img_sign <- NULL
+    if(is.null(input$in_im_sign)) {
+      im_sign <- NULL
     }else{
       magick::image_write(
-        magick::image_convert(magick::image_read(input$in_img_sign$datapath,tolower(sub("^.+[.]","",basename(input$in_img_sign$datapath))))),
+        magick::image_convert(magick::image_read(input$in_im_sign$datapath),format="png"),
         path=file.path(store$epath,"image.png"),format="png")
-      img_sign <- png::readPNG(file.path(store$epath,"image.png"))
+      im_sign <- png::readPNG(file.path(store$epath,"image.png"))
     }
     
     bg <- readPNG("./www/bg.png")
     logo_right <- readPNG("./www/nbis.png")
     
     return(list(names=names,txt=txt,offset_x=offset_x,offset_y=offset_y,
-                img_sign=img_sign,img_sign_width=img_sign_width,img_sign_offset_y=img_sign_offset_y,
+                im_sign=im_sign,im_sign_width=im_sign_width,im_sign_offset_y=im_sign_offset_y,
                 bg=bg,logo_right=logo_right))
   })
 
@@ -141,8 +141,8 @@ server <- function(input, output, session) {
     
     progress1$set(message="Generating figure...", value=40)
     
-    sapply(p$names[1],make_certificate,txt=p$txt,img_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,
-           img_sign=p$img_sign,img_sign_width=p$img_sign_width,img_sign_offset_y=p$img_sign_offset_y,logo_right=p$logo_right,
+    sapply(p$names[1],make_certificate,txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,
+           im_sign=p$im_sign,im_sign_width=p$im_sign_width,im_sign_offset_y=p$im_sign_offset_y,logo_right=p$logo_right,
            format_export="png",path=store$epath)
     fname <- list.files(path=store$epath,pattern="png",full.names=TRUE)[1]
     
@@ -174,8 +174,8 @@ server <- function(input, output, session) {
     
     p <- fn_params()
     
-    sapply(p$names,make_certificate,txt=p$txt,img_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,
-           img_sign=p$img_sign,img_sign_width=p$img_sign_width,img_sign_offset_y=p$img_sign_offset_y,logo_right=p$logo_right,
+    sapply(p$names,make_certificate,txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,
+           im_sign=p$im_sign,im_sign_width=p$im_sign_width,im_sign_offset_y=p$im_sign_offset_y,logo_right=p$logo_right,
            format_export="pdf",path=store$epath)
     
     epathn <- file.path(store$epath,"certificates.zip")

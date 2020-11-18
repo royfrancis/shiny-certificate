@@ -15,7 +15,7 @@ Click [here](https://roymf.shinyapps.io/certificate/) to access an online instan
 ### Run using docker
 
 ```
-docker run --rm -p 8787:8787 royfrancis/shiny-certificate:v1.1.0
+docker run --rm -p 8787:8787 royfrancis/shiny-certificate:v1.1.1
 ```
 
 The app should be available through a web browser at `http://0.0.0.0:8787`.

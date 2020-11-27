@@ -16,56 +16,57 @@ ui <- fluidPage(theme=shinytheme("flatly"),
                                   span(tags$h4(strong("Workshop Certificate"),style="margin:0px;"),style="vertical-align:middle;display:inline-block;")
                          ),
                          fixedRow(
-                           column(3,style="max-width:450px;background:#ebedef;padding-top:15px;padding-bottom:15px;border-radius:4px;",
-                                  div(
-                                    style="padding-top:5px;padding-bottom:10px",
-                                    div(style="margin-bottom:5px;",strong("Name(s)")),
-                                    shinyAce::aceEditor("in_names","John Doe",mode="text",theme="textmate",readOnly=FALSE,height="100px",fontSize=12),
-                                    fluidRow(
-                                      column(12,
-                                             HTML('<div class="help-note"><i class="fas fa-info-circle"></i>  Add one name per row.</div>'),
-                                      )
-                                    )
+                           column(3,class="box-left",
+                                  div(class="box-block",
+                                    textAreaInput("in_names","",value="John Doe",resize="vertical",width="100%"),
+                                    shinyBS::bsTooltip(id="in_names",title="Participant name(s). Add one name per row.",placement="top",trigger="hover"),
                                   ),
-                                  fluidRow(
-                                    column(12,style="margin-bottom:10px;",
-                                           div(style="margin-bottom:5px;",strong("Main text")),
-                                           shinyAce::aceEditor("in_txt",txt_default,mode="text",theme="textmate",readOnly=FALSE,height="200px",fontSize=12),
-                                           HTML('<div class="help-note"><i class="fas fa-info-circle"></i>  Supports limited markdown formatting. Do not remove &lt;&lt;name&gt;&gt;.</div>'),
-                                    )
-                                  ),
-                                  fluidRow(style="margin-bottom:15px;",
-                                    column(6,style=list("padding-right: 3px;"),
-                                           numericInput("in_offset_x","X position",min=0.01,max=0.90,value=0.08,step=0.01)
-                                    ),
-                                    column(6,style=list("padding-left: 3px;"),
-                                           numericInput("in_offset_y","Y position",min=0.01,max=0.90,value=0.72,step=0.01)
-                                    )
-                                  ),
-                                  fileInput("in_im_sign","Upload Signature",multiple=FALSE,width="100%"),
                                   fluidRow(
                                     column(12,
-                                           HTML('<div class="help-note"><i class="fas fa-info-circle"></i>  Use a PNG image with transparent background.</div>'),
+                                           textAreaInput("in_txt","",value=txt_default,resize="vertical",width="100%",height="250px"),
+                                           shinyBS::bsTooltip(id="in_txt",title="Main text. Supports limited markdown formatting. Do not remove &lt;&lt;name&gt;&gt;.",placement="top",trigger="hover"),
                                     )
                                   ),
-                                  fluidRow(style="margin-bottom:15px;margin-top:10px;",
-                                    column(6,style=list("padding-right: 3px;"),
-                                           numericInput("in_im_sign_width","Signature size",min=0.01,max=0.90,value=0.40,step=0.01)
-                                    ),
-                                    column(6,style=list("padding-left: 3px;"),
-                                           numericInput("in_im_sign_offset_y","Signature position",min=0.01,max=0.90,value=0.70,step=0.01)
-                                    )
-                                  ),
-                                  div(style="margin-top:20px;margin-bottom:20px;",downloadButton("btn_download","Download")),
-                                  div(style="font-size:0.8em;",paste0(format(Sys.time(),'%Y'),' • Roy Francis • Version: ',fn_version()))
-                           ),
-                           column(9,style="max-width:450px;min-width:400px;padding-top:15px;padding-bottom:15px;border-radius:4px;",
-                                  sliderInput("in_scale","Image preview scale",min=1,max=5,step=0.2,value=2.2),
                                   fluidRow(
-                                    column(12,style="padding-top:5px;padding-bottom:10px",
-                                           HTML('<div class="help-note"><i class="fas fa-info-circle"></i>  Scale controls preview below and does not affect download. Preview only shows output for the first name. Download generates all names.</div>')
-                                          )
+                                    column(4,class="no-pad-right",
+                                           numericInput("in_offset_x","",min=0,max=1.0,value=0.12,step=0.01),
+                                           shinyBS::bsTooltip(id="in_offset_x",title="Horizontal content position. Value between 0 and 1.",placement="top",trigger="hover"),
+                                    ),
+                                    column(4,class="no-pad-right",
+                                           numericInput("in_offset_y","",min=0,max=1.0,value=0.7,step=0.01),
+                                           shinyBS::bsTooltip(id="in_offset_y",title="Vertical main text position. Value between 0 and 1.",placement="top",trigger="hover"),
+                                    ),
+                                    column(4,
+                                           numericInput("in_text_size_main","",min=3.0,max=6.0,value=4.4,step=0.1),
+                                           shinyBS::bsTooltip(id="in_text_size_main",title="Font size of main text. Value between 3.0 and 6.0.",placement="top",trigger="hover"),
+                                    )
                                   ),
+                                  fileInput("in_im_sign","",multiple=FALSE,width="100%",placeholder="Upload signature"),
+                                  fluidRow(
+                                    column(12,
+                                           HTML('<div class="help-note"><i class="fas fa-info-circle"></i> For signature, use a PNG image with transparent background.</div>'),
+                                    )
+                                  ),
+                                  fluidRow(
+                                    column(6,class="no-pad-right",
+                                           numericInput("in_im_sign_width","Signature",min=0.01,max=0.90,value=0.28,step=0.01),
+                                           shinyBS::bsTooltip(id="in_im_sign_width",title="Signature size. Value between 0.01 & 0.9.",placement="top",trigger="hover"),
+                                    ),
+                                    column(6,
+                                           numericInput("in_im_sign_offset_y","",min=0,max=1.0,value=0.67,step=0.01),
+                                           shinyBS::bsTooltip(id="in_im_sign_offset_y",title="Signature position. Value between 0 & 1.",placement="top",trigger="hover"),
+                                    )
+                                  ),
+                                  div(style="margin-top:20px;margin-bottom:25px;",downloadButton("btn_download","Download")),
+                                  div(style="font-size:0.9em;",paste0(format(Sys.time(),'%Y'),' • Roy Francis • Version: ',fn_version()))
+                           ),
+                           column(9,
+                                  #sliderInput("in_scale","Image preview scale",min=1,max=5,step=0.2,value=2.2),
+                                  #fluidRow(
+                                  #  column(12,style="padding-top:5px;padding-bottom:10px",
+                                  #         HTML('<div class="help-note"><i class="fas fa-info-circle"></i>  Scale controls preview below and does not affect download. Preview only shows output for the first name. Download generates all names.</div>')
+                                  #        )
+                                  #),
                                   div(class="img-output",
                                     imageOutput("out_plot",width="auto",height="auto")
                                   )
@@ -87,12 +88,6 @@ server <- function(input, output, session) {
   ## function to get plot params
 
   fn_params <- reactive({
-
-    #validate(fn_validate(input$in_text_name))
-    #validate(fn_validate(input$in_text_title))
-    #validate(fn_validate(input$in_text_dept))
-    #validate(fn_validate(input$in_text_email))
-    #validate(fn_validate(input$in_text_phone))
     
     fn_validate_im <- function(x){
       if(!is.null(x)){
@@ -107,10 +102,11 @@ server <- function(input, output, session) {
     # if values are available, use them, else use defaults
     if(is.null(input$in_names)){names <- "John Doe"}else{names <- unlist(strsplit(input$in_names,"\n"))}
     if(is.null(input$in_txt)){txt <- txt_default}else{txt <- input$in_txt}
-    if(is.null(input$in_offset_x)){offset_x <- 0.08}else{offset_x <- input$in_offset_x}
-    if(is.null(input$in_offset_y)){offset_y <- 0.72}else{offset_y <- input$in_offset_y}
-    if(is.null(input$in_im_sign_width)){im_sign_width<- 0.40}else{im_sign_width <- input$in_im_sign_width}
-    if(is.null(input$in_im_sign_offset_y)){im_sign_offset_y <- 0.70}else{im_sign_offset_y <- input$in_im_sign_offset_y}
+    if(is.null(input$in_offset_x)){offset_x <- 0.12}else{offset_x <- input$in_offset_x}
+    if(is.null(input$in_offset_y)){offset_y <- 0.70}else{offset_y <- input$in_offset_y}
+    if(is.null(input$in_text_size_main)){text_size_main <- 4.4}else{text_size_main <- input$in_text_size_main}
+    if(is.null(input$in_im_sign_width)){im_sign_width<- 0.28}else{im_sign_width <- input$in_im_sign_width}
+    if(is.null(input$in_im_sign_offset_y)){im_sign_offset_y <- 0.67}else{im_sign_offset_y <- input$in_im_sign_offset_y}
     
     if(is.null(input$in_im_sign)) {
       im_sign <- NULL
@@ -124,7 +120,7 @@ server <- function(input, output, session) {
     bg <- readPNG("./www/bg.png")
     logo_right <- readPNG("./www/nbis.png")
     
-    return(list(names=names,txt=txt,offset_x=offset_x,offset_y=offset_y,
+    return(list(names=names,txt=txt,offset_x=offset_x,offset_y=offset_y,text_size_main=text_size_main,
                 im_sign=im_sign,im_sign_width=im_sign_width,im_sign_offset_y=im_sign_offset_y,
                 bg=bg,logo_right=logo_right))
   })
@@ -141,7 +137,7 @@ server <- function(input, output, session) {
     
     progress1$set(message="Generating figure...", value=40)
     
-    sapply(p$names[1],make_certificate,txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,
+    sapply(p$names[1],make_certificate,txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,text_size_main=p$text_size_main,
            im_sign=p$im_sign,im_sign_width=p$im_sign_width,im_sign_offset_y=p$im_sign_offset_y,logo_right=p$logo_right,
            format_export="png",path=store$epath)
     fname <- list.files(path=store$epath,pattern="png",full.names=TRUE)[1]
@@ -149,9 +145,10 @@ server <- function(input, output, session) {
     progress1$set(message="Completed.", value=100)
     progress1$close()
     
+    scaling <- 2.6
     return(list(src=fname,contentType="image/png",
-                height=round(297*input$in_scale,0),
-                width=round(210*input$in_scale,0),
+                height=round(297*scaling,0),
+                width=round(210*scaling,0),
                 alt="certificate"))
   },deleteFile=TRUE)
   
@@ -174,7 +171,7 @@ server <- function(input, output, session) {
     
     p <- fn_params()
     
-    sapply(p$names,make_certificate,txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,
+    sapply(p$names,make_certificate,txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,text_size_main=p$text_size_main,
            im_sign=p$im_sign,im_sign_width=p$im_sign_width,im_sign_offset_y=p$im_sign_offset_y,logo_right=p$logo_right,
            format_export="pdf",path=store$epath)
     

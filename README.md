@@ -15,7 +15,7 @@ Click [here](https://roymf.shinyapps.io/certificate/) to access an online instan
 ### Run using docker
 
 ```
-docker run --rm -p 8787:8787 royfrancis/shiny-certificate:v1.1.1
+docker run --rm -p 8787:8787 royfrancis/shiny-certificate:v1.1.2
 ```
 
 The app should be available through a web browser at `http://0.0.0.0:8787`.
@@ -25,7 +25,7 @@ The app should be available through a web browser at `http://0.0.0.0:8787`.
 Install the following R packages:
 
 ```
-install.packages(c(Cairo, ggplot2, ggtext, magick, png, shiny, shinythemes, shinyAce, showtext))
+install.packages(c(Cairo, ggplot2, ggtext, magick, png, shiny, shinyBS, shinythemes, showtext))
 ```
 
 This repo is not an R package. In the root directory of this repo, run app using `shiny::runApp("app.R")`.

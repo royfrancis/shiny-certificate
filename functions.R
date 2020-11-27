@@ -8,8 +8,8 @@ library(ggtext)
 library(magick)
 library(png)
 library(shiny)
+library(shinyBS)
 library(shinythemes)
-library(shinyAce)
 library(showtext)
 
 if(!"gfont" %in% sysfonts::font_families()) font_add_google("Lato","gfont")
@@ -17,7 +17,7 @@ showtext_opts(dpi=300)
 
 # fn_version
 fn_version <- function() {
-  return("v1.1.1")
+  return("v1.1.2")
 }
 
 # validation
@@ -114,6 +114,7 @@ im_dims_left <- function(im,im_width,im_offset_x,im_offset_y,canvas_height,canva
 #' @param txt [character] A text string
 #' @param pos_x [numeric] X-axis position of all elements
 #' @param pos_y [numeric] Y-axis position of main text
+#' @param text_size_main [numeric] Size of main text.
 #' @param im_bg [array] Background image, output from readPNG().
 #' @param logo_right [array] Right logo, output from readPNG().
 #' @param logo_right_width [numeric] Width of the logo in plot units
@@ -128,17 +129,17 @@ im_dims_left <- function(im,im_width,im_offset_x,im_offset_y,canvas_height,canva
 #' @param path_export [character] Export path
 #' @return Does not return any value. Exports an A4 sized PDF.
 #'
-make_certificate <- function(name="John Doe",txt,pos_x=0.08,pos_y=0.72,im_bg=NULL,
-                             logo_right=NULL,logo_right_width=0.13,logo_right_offset_x=0.09,logo_right_offset_y=0.065,
-                             im_sign=NULL,im_sign_width=0.40,im_sign_offset_y=0.70,
+make_certificate <- function(name="John Doe",txt,pos_x=0.12,pos_y=0.70,text_size_main=4.4,im_bg=NULL,
+                             logo_right=NULL,logo_right_width=0.11,logo_right_offset_x=0.14,logo_right_offset_y=0.086,
+                             im_sign=NULL,im_sign_width=0.28,im_sign_offset_y=0.67,
                              width=210,height=297,format_export="pdf",path_export=".") {
 
   txt <- gsub("\n","<br>",txt)
-  txt <- sub("<<name>>",paste0("<span style='font-size:28pt;'>",name,"</span>"),txt)
+  txt <- sub("<<name>>",paste0("<span style='font-size:24pt;'>",name,"</span>"),txt)
   txt <- gsub("- ","• ",txt)
 
   dfr <- data.frame(label=txt,x=pos_x,y=pos_y)
-
+  pos_y_upper <- 0.83
   p <- ggplot()
 
   if(!is.null(im_bg)) p <- p+annotation_raster(im_bg,xmin=0,xmax=1,ymin=0,ymax=1)
@@ -157,18 +158,18 @@ make_certificate <- function(name="John Doe",txt,pos_x=0.08,pos_y=0.72,im_bg=NUL
   }
   
    p <- p+
-    ggtext::geom_richtext(data=dfr,aes(x,y,label=label),hjust=0,vjust=1,size=5,family="gfont",colour="grey10",
+    ggtext::geom_richtext(data=dfr,aes(x,y,label=label),hjust=0,vjust=1,size=text_size_main,family="gfont",colour="grey10",
                   fill=NA,label.color=NA,label.padding=grid::unit(rep(0,4),"pt"),lineheight=1.45)+
-    geom_text(data=data.frame(label="Certificate",x=pos_x,y=0.85),
-              aes(x,y,label=label),hjust=0,size=14,family="gfont",fontface="bold",colour="white")+
-    geom_text(data=data.frame(label="NBIS • TRAINING",x=pos_x,y=0.91),
+    geom_text(data=data.frame(label="Certificate",x=pos_x,y=pos_y_upper),
+              aes(x,y,label=label),hjust=0,size=13,family="gfont",fontface="bold",colour="white")+
+    geom_text(data=data.frame(label="NBIS • TRAINING",x=pos_x,y=pos_y_upper+0.06),
               aes(x,y,label=label),hjust=0,size=6,family="gfont",colour="white")+
-    geom_text(data=data.frame(label="www.nbis.se",x=pos_x,y=0.93),
+    geom_text(data=data.frame(label="www.nbis.se",x=pos_x,y=pos_y_upper+0.08),
               aes(x,y,label=label),hjust=0,size=4,family="gfont",colour="white")+
-    ggtext::geom_richtext(data=data.frame(label="This is a certificate of participation. Participants are not evaluated. <br>
-    **National Bioinformatics Infrastructure Sweden (NBIS)** is a distributed national research infrastructure supported by the <br>
-    Swedish Research Council, Science for Life Laboratory, Knut and Alice Wallenberg Foundation and all major Swedish universities <br>
-    in providing state-of-the-art bioinformatics to the Swedish life science research community.",x=pos_x,y=0.06),
+    ggtext::geom_richtext(data=data.frame(label="This is a certificate of participation. Participants are not evaluated.<br>
+    **National Bioinformatics Infrastructure Sweden (NBIS)** is a distributed national research infrastructure supported<br>
+    by the Swedish Research Council, Science for Life Laboratory, Knut and Alice Wallenberg Foundation and all major<br>
+    Swedish universities in providing state-of-the-art bioinformatics to the Swedish life science research community.",x=pos_x,y=0.10),
                aes(x,y,label=label),hjust=0,size=3,family="gfont",colour="grey10",lineheight=1.3,fill=NA,label.color=NA,label.padding=grid::unit(rep(0,4),"pt"))+
     coord_cartesian(xlim=c(0,1),ylim=c(0,1))+
     scale_x_continuous(expand=c(0,0))+

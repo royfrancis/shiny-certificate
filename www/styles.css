@@ -68,9 +68,9 @@
 
 @media all and (min-width: 768px) {
   .no-pad-right {
-    padding-right: 0;
+    padding-right: 7.5px;
   }
   .no-pad-left {
-    padding-left: 0;
+    padding-left: 7.5px;
   }
 }

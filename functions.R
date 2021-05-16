@@ -1,4 +1,4 @@
-# certificate
+# shiny-certificate
 # functions
 
 library(Cairo)
@@ -15,9 +15,17 @@ library(showtext)
 if(!"gfont" %in% sysfonts::font_families()) font_add_google("Lato","gfont")
 showtext_opts(dpi=300)
 
+fn_dir <- function(session)
+{
+  wd <- file.path(tempdir(check=TRUE),session$token)
+  if(!dir.exists(wd)) dir.create(wd)
+  cat(paste0("Working directory: ",wd,"\n"))
+  return(wd)
+}
+
 # fn_version
 fn_version <- function() {
-  return("v1.1.3")
+  return("v1.1.4")
 }
 
 # validation
@@ -58,6 +66,10 @@ fn_validate <- function(input,message1,message2,message3)
   } else {
     NULL
   }
+}
+
+fn_validate_numeric <- function(input) {
+  if(is.na(as.numeric(input))) print("Input is not a numeric.")
 }
 
 # im_dims_right ------------------------------------------------------------

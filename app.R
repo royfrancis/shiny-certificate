@@ -1,6 +1,6 @@
-## certificate
+## shiny-certificate
 ## R shinyapp to generate workshop certificates
-## 2020 Roy Mathew Francis
+## 2021 Roy Mathew Francis
 
 source("functions.R")
 
@@ -57,7 +57,12 @@ ui <- fluidPage(theme=shinytheme("flatly"),
                                            shinyBS::bsTooltip(id="in_im_sign_offset_y",title="Signature position. Value between 0 & 1.",placement="top",trigger="hover"),
                                     )
                                   ),
-                                  div(style="margin-top:20px;margin-bottom:25px;",downloadButton("btn_download","Download")),
+                                  fluidRow(style="margin-top:20px;margin-bottom:25px;",
+                                      column(6,class="no-pad-right",
+                                             downloadButton("btn_download","Download")),
+                                      column(6,class="no-pad-left",
+                                             actionButton("btn_reset","Reset",class="btn-sm btn-warning"))
+                                      ),
                                   div(style="font-size:0.9em;",paste0(format(Sys.time(),'%Y'),' • Roy Francis • Version: ',fn_version()))
                            ),
                            column(9,
@@ -82,7 +87,7 @@ ui <- fluidPage(theme=shinytheme("flatly"),
 server <- function(input, output, session) {
 
   ## get temporary directory
-  store <- reactiveValues(epath=tempdir())
+  store <- reactiveValues(epath=fn_dir(session))
   
   ## FN: fn_params ------------------------------------------------------------
   ## function to get plot params
@@ -102,10 +107,16 @@ server <- function(input, output, session) {
     # if values are available, use them, else use defaults
     if(is.null(input$in_names)){names <- "John Doe"}else{names <- unlist(strsplit(input$in_names,"\n"))}
     if(is.null(input$in_txt)){txt <- txt_default}else{txt <- input$in_txt}
+    
+    validate(fn_validate_numeric(input$in_offset_x))
     if(is.null(input$in_offset_x)){offset_x <- 0.12}else{offset_x <- input$in_offset_x}
+    validate(fn_validate_numeric(input$in_offset_y))
     if(is.null(input$in_offset_y)){offset_y <- 0.70}else{offset_y <- input$in_offset_y}
+    validate(fn_validate_numeric(input$in_text_size_main))
     if(is.null(input$in_text_size_main)){text_size_main <- 4.4}else{text_size_main <- input$in_text_size_main}
+    validate(fn_validate_numeric(input$in_im_sign_width))
     if(is.null(input$in_im_sign_width)){im_sign_width<- 0.28}else{im_sign_width <- input$in_im_sign_width}
+    validate(fn_validate_numeric(input$in_im_sign_offset_y))
     if(is.null(input$in_im_sign_offset_y)){im_sign_offset_y <- 0.67}else{im_sign_offset_y <- input$in_im_sign_offset_y}
     
     if(is.null(input$in_im_sign)) {
@@ -130,20 +141,20 @@ server <- function(input, output, session) {
 
   output$out_plot <- renderImage({
     
-    progress1 <- shiny::Progress$new()
-    progress1$set(message="Capturing settings...", value=10)
+    progress_plot <- shiny::Progress$new()
+    progress_plot$set(message="Capturing settings...", value=0.1)
     
     p <- fn_params()
     
-    progress1$set(message="Generating figure...", value=40)
+    progress_plot$set(message="Generating figure...", value=0.4)
     
-    sapply(p$names[1],make_certificate,txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,text_size_main=p$text_size_main,
+    make_certificate(p$names[1],txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,text_size_main=p$text_size_main,
            im_sign=p$im_sign,im_sign_width=p$im_sign_width,im_sign_offset_y=p$im_sign_offset_y,logo_right=p$logo_right,
            format_export="png",path=store$epath)
     fname <- list.files(path=store$epath,pattern="png",full.names=TRUE)[1]
     
-    progress1$set(message="Completed.", value=100)
-    progress1$close()
+    progress_plot$set(message="Completed.", value=1)
+    progress_plot$close()
     
     scaling <- 2.6
     return(list(src=fname,contentType="image/png",
@@ -170,16 +181,26 @@ server <- function(input, output, session) {
   fn_download <- function(){
     
     p <- fn_params()
+    n <- p$names
     
-    sapply(p$names,make_certificate,txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,text_size_main=p$text_size_main,
-           im_sign=p$im_sign,im_sign_width=p$im_sign_width,im_sign_offset_y=p$im_sign_offset_y,logo_right=p$logo_right,
-           format_export="pdf",path=store$epath)
+    progress_download <- shiny::Progress$new()
+    progress_download$set(message="Preparing PDF...", value=0.1)
+    
+    for(i in seq_along(n)) {
+      make_certificate(name=n[i],txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,text_size_main=p$text_size_main,im_sign=p$im_sign,im_sign_width=p$im_sign_width,im_sign_offset_y=p$im_sign_offset_y,logo_right=p$logo_right,format_export="pdf",path=store$epath)
+      progress_download$set(value=round(i/length(n),1)-0.1,message="Exporting PDFs...")
+    }
+    #sapply(n,make_certificate,txt=p$txt,im_bg=p$bg,pos_x=p$offset_x,pos_y=p$offset_y,text_size_main=p$text_size_main, im_sign=p$im_sign,im_sign_width=p$im_sign_width,im_sign_offset_y=p$im_sign_offset_y,logo_right=p$logo_right,format_export="pdf",path=store$epath)
     
     epathn <- file.path(store$epath,"certificates.zip")
     if(exists(epathn)) unlink(epathn)
     
+    progress_download$set(value=0.95,message="Zipping PDFs...")
+    
     zip(epathn,files=list.files(path=store$epath,pattern="pdf",full.names=TRUE))
     unlink(list.files(path=store$epath,pattern="pdf",full.names=TRUE))
+    
+    progress_download$close()
   }
 
   ## DHL: btn_download ---------------------------------------------------------
@@ -189,17 +210,34 @@ server <- function(input, output, session) {
     filename="certificates.zip",
     content=function(file) {
       
-      progress <- shiny::Progress$new()
-      progress$set(message="Generating PDFs...", value=45)
       fn_download()
-      
-      progress$set(message="Downloading zipped file...", value=90)
       file.copy(file.path(store$epath,"certificates.zip"),file,overwrite=T)
-      
-      progress$set(message="Completed.", value=100)
-      progress$close()
+      unlink(list.files(path=store$epath,pattern="certificates.zip",full.names=TRUE))
     }
   )
+  
+  # OBS: btn_reset ----------------------------------------------------
+  # observer for reset
+  
+  observeEvent(input$btn_reset,{
+    updateTextAreaInput(session,"in_names","",value="John Doe")
+    updateTextAreaInput(session,"in_txt","",value=txt_default)
+    updateNumericInput(session,"in_offset_x","",min=0,max=1.0,value=0.12,step=0.01)
+    updateNumericInput(session,"in_offset_y","",min=0,max=1.0,value=0.7,step=0.01)
+    updateNumericInput(session,"in_text_size_main","",min=3.0,max=6.0,value=4.4,step=0.1)
+    updateNumericInput(session,"in_im_sign_width","",min=0.01,max=0.90,value=0.28,step=0.01)
+    updateNumericInput(session,"in_im_sign_offset_y","",min=0,max=1.0,value=0.67,step=0.01)
+  })
+  
+  ## OSE ------------------------------------------------------------------------
+  ## delete user directory when session ends
+  
+  session$onSessionEnded(function() {
+    cat(paste0("Removing user directory ",isolate(store$epath)," ...\n"))
+    if(dir.exists(isolate(store$epath))){
+      unlink(isolate(store$epath),recursive=TRUE)
+    }
+  })
 }
 
 shinyApp(ui=ui, server=server)

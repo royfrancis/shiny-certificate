@@ -28,6 +28,6 @@ Install the following R packages:
 install.packages(c(Cairo, ggplot2, ggtext, magick, png, shiny, shinyBS, shinythemes, showtext))
 ```
 
-This repo is not an R package. In the root directory of this repo, run app using `shiny::runApp("app.R")`.
+This repo is not an R package. Clone this repo and execute the R command `shiny::runApp("app.R")` in the root directory.
 
-2020 • Roy Francis
+2021 • Roy Francis

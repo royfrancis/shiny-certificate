@@ -5,10 +5,10 @@ ARG REPO="royfrancis/shiny-certificate"
 RUN apt-get update && \
     apt-get upgrade -y && \
     apt-get clean && \
-    apt-get install -y git libxml2-dev libmagick++-dev && \
+    apt-get install -y git libxml2-dev libmagick++-dev libudunits2-dev && \
     rm -rf /var/lib/apt/lists/*
 
-RUN Rscript -e 'install.packages(c("Cairo","curl","ggplot2","ggtext","magick","png","shinyBS","shinythemes","showtext"))'
+RUN Rscript -e 'install.packages(c("Cairo","curl","ggplot2","ggforce","ggtext","magick","png","shinyBS","shinythemes","showtext"))'
 
 RUN cd /srv/shiny-server/ && \
     git clone https://github.com/${REPO}.git app && \

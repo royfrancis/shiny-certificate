@@ -4,6 +4,7 @@
 library(Cairo)
 library(curl)
 library(ggplot2)
+library(ggforce)
 library(ggtext)
 library(magick)
 library(png)
@@ -25,7 +26,7 @@ fn_dir <- function(session)
 
 # fn_version
 fn_version <- function() {
-  return("v1.1.4")
+  return("v1.1.5")
 }
 
 # validation
@@ -153,8 +154,19 @@ make_certificate <- function(name="John Doe",txt,pos_x=0.12,pos_y=0.70,text_size
   dfr <- data.frame(label=txt,x=pos_x,y=pos_y)
   pos_y_upper <- 0.83
   p <- ggplot()
-
-  if(!is.null(im_bg)) p <- p+annotation_raster(im_bg,xmin=0,xmax=1,ymin=0,ymax=1)
+  
+  # add custom background
+  #if(!is.null(im_bg)) p <- p+annotation_raster(im_bg,xmin=0,xmax=1,ymin=0,ymax=1)
+  # add background circles
+  dfr_circle <- data.frame(label=c("top-left large","top-right-small","mid-left-small","bottom-right-medium"),
+                           x0=c(0.2,0.8,-0.03,1.15),
+                           y0=c(1.1,0.75,0.45,0.19),
+                           a=c(0.35,0.06,0.04,0.16),
+                           b=c(0.35+0.16,0.06+0.024,0.04+0.02,0.16+0.07),
+                           angle=rep(pi/2,4))
+  p <- p+geom_ellipse(data=dfr_circle,aes(x0=x0,y0=y0,a=a,b=b,angle=angle),fill="#A7C947",colour="#A7C947",alpha=1)
+  
+  # add logo right
   if(!is.null(logo_right)) {
     dims_logo_right <- im_dims_right(logo_right,logo_right_width,logo_right_offset_x,logo_right_offset_y,height,width)
     p <- p + annotation_raster(logo_right,xmin=dims_logo_right$xmin,xmax=dims_logo_right$xmax,
@@ -183,6 +195,8 @@ make_certificate <- function(name="John Doe",txt,pos_x=0.12,pos_y=0.70,text_size
     by the Swedish Research Council, Science for Life Laboratory, Knut and Alice Wallenberg Foundation and all major<br>
     Swedish universities in providing state-of-the-art bioinformatics to the Swedish life science research community.",x=pos_x,y=0.10),
                aes(x,y,label=label),hjust=0,size=3,family="gfont",colour="grey10",lineheight=1.3,fill=NA,label.color=NA,label.padding=grid::unit(rep(0,4),"pt"))+
+     ggtext::geom_richtext(data=data.frame(label=paste0(fn_version(),". Printed ",format(Sys.time(),format='%d-%b-%Y at %H:%M')),x=pos_x,y=0.06),
+                           aes(x,y,label=label),hjust=0,size=2,family="gfont",colour="grey10",lineheight=1.3,fill=NA,label.color=NA,label.padding=grid::unit(rep(0,4),"pt"))+
     coord_cartesian(xlim=c(0,1),ylim=c(0,1))+
     scale_x_continuous(expand=c(0,0))+
     scale_y_continuous(expand=c(0,0))+
@@ -234,7 +248,7 @@ txt_default <- c(
 "**<<name>>**
 
 has participated in the NBIS workshop **Advanced Analysis of Data**
-held in **Uppsala** during **11-15 Nov, 2020**.
+held in **Uppsala** during **17-21 May, 2021**.
 
 The workshop consisted of 40 hours of lectures and computer exercises.
 This included the following topics:
